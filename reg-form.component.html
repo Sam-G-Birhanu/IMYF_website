@@ -1,0 +1,118 @@
+<!-- Section: Design Block -->
+<!-- <section>
+  
+</section> -->
+<section class="text-center">
+    <!-- Background image -->
+    <div class="p-5 bg-image" style="
+          /* background-image: url('../assets/imgs/jesus2.png');  */
+          background-color: #5D5E5D;
+          height: 300px;
+          "></div>
+    <!-- Background image -->
+  
+    
+    <div class="card mx-4 mx-md-5 shadow-5-strong" style="
+          margin-top: -100px;
+          background: hsla(0, 0%, 100%, 0.8);
+          backdrop-filter: blur(30px);
+          ">
+      <div class="card-body py-5 px-md-5">
+  
+        <div class="row d-flex justify-content-center">
+          <div class="col-lg-8">
+            <app-about-quiz></app-about-quiz>
+            <h2 class="fw-bold mb-5">Register now</h2>
+            <form [formGroup]="regform" >
+                <!-- <form> -->
+
+              <!-- 2 column grid layout with text inputs for the first and last names -->
+              <div class="row">
+                <div class="col-md-6 mb-4">
+                  <div class="form-outline">
+                    <input [(ngModel)]="fullname" formControlName="fullname" name="fullname" type="text" id="form3Example1" class="form-control" />
+
+                    <label class="form-label" for="form3Example1">Full Name</label>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                  <div class="form-outline">
+                    <!-- <input [(ngModel)]="lastname" formControlName="lastname" name="lastname" type="text" id="form3Example2" class="form-control" /> -->
+                    <input [(ngModel)]="fathername" formControlName="fathername" name="fathername" type="text" id="form3Example2" class="form-control" />
+
+                    <label class="form-label" for="form3Example2">Father's Name</label>
+                  </div>
+                </div>
+              </div>
+              <input name="dob" class="form-control" type="date" required />
+              <label class="form-label" >Date of birth</label>
+              <!-- Email input -->
+              <div class="row">
+                <div class="col-md-6 mb-4">
+                  <div class="form-outline">
+                    <!-- <input [(ngModel)]="firstname" formControlName="firstname" name="firstname" type="text" id="form3Example1" class="form-control" /> -->
+                   <input [(ngModel)]="age" formControlName="age" name="age" type="text" id="form3Example2" class="form-control"/>
+                    <!-- <input [(ngModel)]="age" formControlName="firstname" name="firstname" type="text" id="form3Example1" class="form-control" /> -->
+
+                    <label class="form-label" for="form3Example1">Age</label>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                  <div class="form-outline">
+                    <select [(ngModel)]="age_group" formControlName="age_group" id="age_group" name="age_group" class="form-select">
+                        <option value="jr">Junior</option>
+                        <option value="int">Intermediate</option>
+                        <option value="snr">Senior</option>
+                      </select>
+
+                    <label class="form-label" for="form3Example2">Age Group</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-outline mb-4">
+                <!-- <input  [(ngModel)]="email" type="email" class="form-control" formControlName="email" name="email"  /> -->
+                <input type="email" class="form-control" formControlName="email" name="email"  />
+
+                <label class="form-label" for="form3Example3">Email address</label>
+              </div>
+              
+              <!-- <div *ngIf="LoginForm.invalid" class="alert alert-danger" role="alert"> -->
+                <!-- <div class="alert alert-danger" role="alert">
+
+                Please enter a correct email
+              </div>
+   -->
+
+      <button class="btn btn-secondary" (click)="isExpanded = !isExpanded">Read the terms and conditions</button>
+
+<div *ngIf="isExpanded" class="terms-and-conditions mt-4">
+    <app-terms></app-terms>
+          
+         
+</div>
+
+  
+              <!-- Checkbox -->
+              <!-- <div class="form-check d-flex justify-content-center mb-4">
+                <input class="form-check-input me-2" type="checkbox" value="" id="form2Example33" checked />
+                <label class="form-check-label" for="form2Example33">
+                  I have read the terms and conditions.
+                </label>
+              </div> -->
+  
+              <!-- Submit button -->
+              <!-- <button (click)="signUp()"  type="submit" class="btn btn-primary btn-block mb-4"> -->
+                <div>
+                <button (click)="onSubmit()"  type="submit" type="submit" class="btn btn-primary">
+
+                Sign up
+              </button>
+            </div>
+             
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Section: Design Block -->
