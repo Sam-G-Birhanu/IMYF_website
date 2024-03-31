@@ -126,7 +126,7 @@ def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, 
 # Example usage:
 # generate_hall_ticket("AG/EC.123", "John Doe", "25", "AG", "John Doe Sr.", "1234 5678 9012", "9876543210", "March 15, 2024", "Exam Centre A", "123 Main St, City, Country", "John Doe", "Convener", "hall_ticket_shorter.pdf")
 
-def generate_refNo(age_group, exam_centre, mobile_no):
+# def generate_refNo(age_group, exam_centre, mobile_no):
     
 
 
