@@ -9,6 +9,10 @@ CORS(app)
 # CORS(app, resources={r"/api/*": {"origins": "http://localhost:4200"}})
 
 from sqlalchemy import create_engine, text
+@app.route('/')
+def hello():
+    return 'hello there'
+
 @app.route('/api/generate_pdf', methods=['OPTIONS'])
 def handle_options():
     return '', 200, {
@@ -29,43 +33,20 @@ def generate_certificate_route():
     email = data.get('email')
     # logo_path = data.get('logoPath')
     filename = 'certificate.pdf'  
+    data = request.get_json()
+    user_data = {
+    'fullname' : data.get('fullname'),
+    'fathername' : data.get('fathername'),
+    'dob': data.get('date'),
+    'age': data.get('age'),
+    'age_group': data.get('age_group'),
+    'email': data.get('email')
+    }
+    # logo_path = data.get('logoPath')
+    filename = 'certificate.pdf' 
 
     generate_hall_ticket("AG/EC.123", fullname, age, age_group, fathername,"123456789012", "9876543210", "ExamCentreA", "Country", "hall_ticket.pdf", "10-Mar-2024")
     return jsonify({'success': True, 'filename': filename})
-
-# def generate_certificate(name, course, date, logo_path, filename):
-# # def generate_certificate(name, course, date, logo_path, filename):
-#     c = canvas.Canvas(filename, pagesize=letter)
-    
-#     # Certificate Title
-#     c.setFont("Helvetica-Bold", 24)
-#     c.drawCentredString(300, 750, "Certificate of Completion")
-
-#     # Recipient Name
-#     c.setFont("Helvetica-Bold", 18)
-#     c.drawCentredString(300, 700, f"This certificate is awarded to {name}")
-
-#     # Course Name
-#     c.setFont("Helvetica", 16)
-#     c.drawCentredString(300, 650, f"for completing the course: {course}")
-
-#     # Date
-#     c.setFont("Helvetica", 12)
-#     c.drawCentredString(300, 600, f"Date: {date}")
-
-#     # Insert Logo
-#     c.drawImage('Meba bruk logo.jpg', 200, 400, width=200, height=100)
-
-#     # Signature
-#     c.setFont("Helvetica", 12)
-#     c.drawString(150, 200, "Signature:")
-#     c.line(250, 200, 450, 200)
-
-#     # Additional Information
-#     c.setFont("Helvetica", 12)
-#     c.drawString(100, 150, "This certificate is issued in recognition of successful completion of the specified course.")
-
-#     c.save()
 
 # # Example usage:
 # generate_certificate("John Doe", "Introduction to Python Programming", "March 11, 2024", "logo.png", "certificate_with_logo.pdf")
