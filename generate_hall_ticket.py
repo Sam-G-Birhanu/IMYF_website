@@ -33,43 +33,6 @@ def generate_certificate_route():
     generate_hall_ticket("AG/EC.123", fullname, age, age_group, fathername,"123456789012", "9876543210", "ExamCentreA", "Country", "hall_ticket.pdf", "10-Mar-2024")
     return jsonify({'success': True, 'filename': filename})
 
-# def generate_certificate(name, course, date, logo_path, filename):
-# # def generate_certificate(name, course, date, logo_path, filename):
-#     c = canvas.Canvas(filename, pagesize=letter)
-    
-#     # Certificate Title
-#     c.setFont("Helvetica-Bold", 24)
-#     c.drawCentredString(300, 750, "Certificate of Completion")
-
-#     # Recipient Name
-#     c.setFont("Helvetica-Bold", 18)
-#     c.drawCentredString(300, 700, f"This certificate is awarded to {name}")
-
-#     # Course Name
-#     c.setFont("Helvetica", 16)
-#     c.drawCentredString(300, 650, f"for completing the course: {course}")
-
-#     # Date
-#     c.setFont("Helvetica", 12)
-#     c.drawCentredString(300, 600, f"Date: {date}")
-
-#     # Insert Logo
-#     c.drawImage('Meba bruk logo.jpg', 200, 400, width=200, height=100)
-
-#     # Signature
-#     c.setFont("Helvetica", 12)
-#     c.drawString(150, 200, "Signature:")
-#     c.line(250, 200, 450, 200)
-
-#     # Additional Information
-#     c.setFont("Helvetica", 12)
-#     c.drawString(100, 150, "This certificate is issued in recognition of successful completion of the specified course.")
-
-#     c.save()
-
-# # Example usage:
-# generate_certificate("John Doe", "Introduction to Python Programming", "March 11, 2024", "logo.png", "certificate_with_logo.pdf")
-
 def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, mobile_no,  exam_centre, exam_centre_address, filename, exam_date):
     c = canvas.Canvas(filename, pagesize=(505, 405))  # shorter page size
     c.setStrokeColorRGB(1, 0.5, 0)
