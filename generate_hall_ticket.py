@@ -17,6 +17,10 @@ from sqlalchemy import create_engine, text
 #         'Access-Control-Allow-Headers': 'Content-Type'
 #     }
 
+@app.route('/')
+def hello():
+    return 'hello there'
+
 
 @app.route('/generate_pdf', methods=['POST'])
 def generate_certificate_route():
