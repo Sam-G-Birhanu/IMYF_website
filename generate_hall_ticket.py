@@ -21,6 +21,10 @@ def handle_options():
         'Access-Control-Allow-Headers': 'Content-Type'
     }
 
+# @app.route('/')
+# def hello():
+#     return 'hello there'
+
 
 @app.route('/generate_pdf', methods=['POST'])
 def generate_certificate_route():
@@ -47,9 +51,6 @@ def generate_certificate_route():
 
     generate_hall_ticket("AG/EC.123", fullname, age, age_group, fathername,"123456789012", "9876543210", "ExamCentreA", "Country", "hall_ticket.pdf", "10-Mar-2024")
     return jsonify({'success': True, 'filename': filename})
-
-# # Example usage:
-# generate_certificate("John Doe", "Introduction to Python Programming", "March 11, 2024", "logo.png", "certificate_with_logo.pdf")
 
 def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, mobile_no,  exam_centre, exam_centre_address, filename, exam_date):
     c = canvas.Canvas(filename, pagesize=(505, 405))  # shorter page size
@@ -105,7 +106,7 @@ def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, 
     c.save()
 
 # Example usage:
-# generate_hall_ticket("AG/EC.123", "John Doe", "25", "AG", "John Doe Sr.", "1234 5678 9012", "9876543210", "March 15, 2024", "Exam Centre A", "123 Main St, City, Country", "John Doe", "Convener", "hall_ticket_shorter.pdf")
+# generate_hall_ticket("AG/EC.123", "John Doe", "25", "AG", "John Doe Sr.", "1234 5678 9012", "9876543210", "March 15, 2024", "Exam Centre A", "123 Main St, City, Country", "hall_ticket_shorter.pdf")
 
 # def generate_refNo(age_group, exam_centre, mobile_no):
     
