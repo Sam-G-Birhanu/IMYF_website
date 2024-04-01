@@ -9,13 +9,13 @@ CORS(app)
 # CORS(app, resources={r"/api/*": {"origins": "http://localhost:4200"}})
 
 from sqlalchemy import create_engine, text
-# @app.route('/api/generate_pdf', methods=['OPTIONS'])
-# def handle_options():
-#     return '', 200, {
-#         'Access-Control-Allow-Origin': 'http://localhost:4200',
-#         'Access-Control-Allow-Methods': 'POST',
-#         'Access-Control-Allow-Headers': 'Content-Type'
-#     }
+@app.route('/api/generate_pdf', methods=['OPTIONS'])
+def handle_options():
+    return '', 200, {
+        'Access-Control-Allow-Origin': 'http://localhost:4200',
+        'Access-Control-Allow-Methods': 'POST',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    }
 
 @app.route('/')
 def hello():
