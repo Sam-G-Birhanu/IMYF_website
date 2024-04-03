@@ -4,6 +4,10 @@ from reportlab.pdfgen import canvas
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
+import os
+
+sender_email = os.environ.get('EMAIL_ADDRESS')
+sender_password = os.environ.get('EMAIL_PASSWORD')
 
 
 app = Flask(__name__)
@@ -121,7 +125,6 @@ def generate_certificate_route():
     }
     # logo_path = data.get('logoPath')
     filename = 'certificate.pdf' 
-
 
 
     generate_hall_ticket("AG/EC.123", fullname, age, age_group, fathername,"123456789012", "9876543210", "ExamCentreA", "Country", "hall_ticket.pdf", "10-Mar-2024")
