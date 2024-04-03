@@ -6,7 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
 
 
-
 app = Flask(__name__)
 CORS(app)
 # CORS(app, resources={r"/api/*": {"origins": "http://localhost:4200"}})
@@ -61,6 +60,27 @@ def register_user(data):
     return jsonify({'message': 'User registered successfully'})
 
 
+
+def send_confirmation_email(email, fullname):  
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    
+    subject = 'Subscription Confirmation'
+    message = f'Hello {fullname},\n\nThank you for subscribing!'
+    
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = email
+    msg['Subject'] = subject
+    
+    msg.attach(MIMEText(message, 'plain'))
+    
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+
+
 # @app.route('/')
 # def hello():
 #     return 'hello there'
@@ -101,6 +121,8 @@ def generate_certificate_route():
     }
     # logo_path = data.get('logoPath')
     filename = 'certificate.pdf' 
+
+
 
     generate_hall_ticket("AG/EC.123", fullname, age, age_group, fathername,"123456789012", "9876543210", "ExamCentreA", "Country", "hall_ticket.pdf", "10-Mar-2024")
     return jsonify({'success': True, 'filename': filename})
