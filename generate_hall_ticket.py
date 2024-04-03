@@ -126,6 +126,8 @@ def generate_certificate_route():
     # logo_path = data.get('logoPath')
     filename = 'certificate.pdf' 
 
+    
+    send_confirmation_email(email, fullname)
 
     generate_hall_ticket("AG/EC.123", fullname, age, age_group, fathername,"123456789012", "9876543210", "ExamCentreA", "Country", "hall_ticket.pdf", "10-Mar-2024")
     return jsonify({'success': True, 'filename': filename})
