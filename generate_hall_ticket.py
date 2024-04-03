@@ -2,16 +2,68 @@ from flask import Flask, request, jsonify
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine, text
+
 
 
 app = Flask(__name__)
 CORS(app)
 # CORS(app, resources={r"/api/*": {"origins": "http://localhost:4200"}})
 
-from sqlalchemy import create_engine, text
-@app.route('/')
-def hello():
-    return 'hello there'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:0000@localhost/user'
+db = SQLAlchemy(app)
+
+
+class User(db.Model):
+    id = db.Column(db.String(15), primary_key=True, nullable=False )
+    fullname = db.Column(db.String(100), nullable=False)
+    fathername = db.Column(db.String(100), nullable=False)
+    dob = db.Column(db.String(20), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    age_group = db.Column(db.String(10), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    exam_centre = db.Column(db.String(100), nullable=False)
+
+def create_tables():
+    with app.app_context():
+        db.create_all()
+
+def register_user(data):
+    data = request.get_json()
+    # print("here")
+    last_user = User.query.order_by(User.id.desc()).first()
+
+    # Extract the last 3 digits from the id and increment it
+    if last_user:
+        last_three_digits = int(last_user.id[-3:])
+        new_last_three_digits = f"{last_three_digits + 1:03d}"
+    else:
+        new_last_three_digits = "001"  # Initial value if no users exist
+
+    # Construct the new id for the user
+    new_user_id = data['age_group'][:2] + "kokata"[:2] + new_last_three_digits
+
+    new_user = User(
+        id = new_user_id,
+        fullname=data['fullname'],
+        fathername=data['fathername'],
+        dob=data['dob'],
+        age=data['age'],
+        age_group=data['age_group'],
+        email=data['email'],
+        # exam_centre=data['exam_centre']
+        exam_centre="kolkata"
+        
+    )
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message': 'User registered successfully'})
+
+
+# @app.route('/')
+# def hello():
+#     return 'hello there'
 
 @app.route('/api/generate_pdf', methods=['OPTIONS'])
 def handle_options():
@@ -29,6 +81,7 @@ def handle_options():
 @app.route('/generate_pdf', methods=['POST'])
 def generate_certificate_route():
     data = request.get_json()
+    register_user(data)
     fullname = data.get('fullname')
     fathername = data.get('fathername')
     dob = data.get('date')
@@ -113,4 +166,5 @@ def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, 
 
 
 if __name__ == '__main__':
+    create_tables()
     app.run(debug=True)
