@@ -1,16 +1,17 @@
 import smtplib
 
-try:
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    server.login('samrig25@gmail.com', '')
-    
-    recipient = ''
-    subject = 'Test Email'
-    body = 'Hello there! This is a test email.'
 
-    message = f'Subject: {subject}\n\n{body}'
-    server.sendmail('', [''], message)
+server = smtplib.SMTP('smtp.gmail.com', 587)
+server.starttls()
+server.login('samrig25@gmail.com', 'irnc kkpy gnfs mwga')
+    
+recipient = 'benyas1asnake@gmail.com'
+subject = 'Test Email'
+body = 'Hello there! This is a test email. You have successfully registered.'
+
+message = f'Subject: {subject}\n\n{body}'
+try:
+    server.sendmail('samrig25@gmail.com', ['benyas1asnake@gmail.com'], message)
     
     print('Mail sent successfully!')
 except Exception as e:
