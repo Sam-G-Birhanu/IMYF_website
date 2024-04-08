@@ -15,7 +15,7 @@ import dropbox
 from reportlab.pdfgen import canvas
 
 sender_email = 'samrig25@gmail.com'
-sender_password = 'irnc kkpy gnfs mwga'
+sender_password = ''
 
 
 app = Flask(__name__)
