@@ -10,9 +10,13 @@ import hashlib
 import secrets
 import string
 from datetime import datetime, timedelta
+from io import BytesIO
+import dropbox
+from reportlab.pdfgen import canvas
 
 sender_email = 'samrig25@gmail.com'
 sender_password = 'irnc kkpy gnfs mwga'
+
 
 app = Flask(__name__)
 CORS(app)
@@ -135,16 +139,31 @@ def generate_certificate_route():
     'examCenterAddress' : data.get('examCenterAddress')
     }
     # logo_path = data.get('logoPath')
-    filename = 'certificate.pdf' 
+    filename = email
 
     
     send_confirmation_email(email, fullname)
 
-    generate_hall_ticket("AG/EC.123", fullname, age, age_group, fathername,"123456789012", "9876543210", "ExamCentreA", "Country", "hall_ticket.pdf", "10-Mar-2024")
+    pdf_data=generate_hall_ticket("AG/EC.123", fullname, age, age_group, fathername,"123456789012", "9876543210", "ExamCentreA", "Country", "hall_ticket.pdf", "10-Mar-2024")
+    
+    save_to_dropbox(pdf_data, filename)
+
     return jsonify({'success': True, 'filename': filename})
 
-def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, mobile_no,  examCenter, examCenterAddress, filename, exam_date):
-    c = canvas.Canvas(filename, pagesize=(505, 405))  # shorter page size
+
+def save_to_dropbox(pdf_data, filename):
+    dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+
+    # Upload the PDF file to Dropbox
+    with dropbox.Dropbox(DROPBOX_ACCESS_TOKEN) as dbx:
+        dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}')
+
+def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, mobile_no,  exam_centre, exam_centre_address, filename, exam_date):
+    buffer = BytesIO()  # Create a BytesIO object to store PDF data
+
+    # Create the PDF content
+    c = canvas.Canvas(buffer, pagesize=(505, 405))
+    
     c.setStrokeColorRGB(1, 0.5, 0)
     # Draw border for entire document
     c.rect(5, 5, 495, 395)
@@ -196,11 +215,50 @@ def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, 
     c.drawImage('./imyf_landing_page/src/assets/imgs/IMYF_logo.jpg', 400, 315, width=60, height=60)
     c.save()
 
+    pdf_data = buffer.getvalue() 
+    buffer.close()  
+
+    return pdf_data
+
 # Example usage:
 # generate_hall_ticket("AG/EC.123", "John Doe", "25", "AG", "John Doe Sr.", "1234 5678 9012", "9876543210", "March 15, 2024", "Exam Centre A", "123 Main St, City, Country", "hall_ticket_shorter.pdf")
 
 # def generate_refNo(age_group, examCenter, mobile_no):
     
+
+
+
+
+
+@app.route('/get_pdf', methods=['GET'])
+def get_pdf():
+    pdf_filename = request.args.get('email') 
+
+    pdf_data = download_from_dropbox(pdf_filename)
+
+    if pdf_data:
+        return send_file(
+            BytesIO(pdf_data),
+            mimetype='application/pdf',
+            as_attachment=True,
+			download_name=f'{pdf_filename}.pdf'
+        )
+    else:
+        return jsonify({'error': 'PDF not found'})
+
+def download_from_dropbox(filename):
+    dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+
+    try:
+        metadata, res = dbx.files_download('/generated_pdfs/' + filename+'.pdf')
+        print("File downloaded successfully")
+        return res.content
+    except dropbox.exceptions.HttpError as err:
+        if err.status_code == 404:
+            return None  # PDF file not found
+        else:
+            raise
+
 
 
 
