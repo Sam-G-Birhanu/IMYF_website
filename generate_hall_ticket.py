@@ -14,10 +14,8 @@ from io import BytesIO
 import dropbox
 from reportlab.pdfgen import canvas
 
-sender_email = os.environ.get('EMAIL_ADDRESS')
-sender_password = os.environ.get('EMAIL_PASSWORD')
-
-DROPBOX_ACCESS_TOKEN = os.environ.get('DROPBOX_ACCESS_TOKEN')
+sender_email = 'samrig25@gmail.com'
+sender_password = 'irnc kkpy gnfs mwga'
 
 
 app = Flask(__name__)
@@ -30,7 +28,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587  
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'samrig25@gmail.com'  
-app.config['MAIL_PASSWORD'] = sender_password
+app.config['MAIL_PASSWORD'] = 'irnc kkpy gnfs mwga'
 db = SQLAlchemy(app)
 mail = Mail(app)
 
@@ -50,8 +48,8 @@ class User(db.Model):
     age = db.Column(db.Integer, nullable=False)
     age_group = db.Column(db.String(10), nullable=False)
     email = db.Column(db.String(100), nullable=False)
-    exam_centre = db.Column(db.String(100), nullable=False)
-
+    examCenter = db.Column(db.String(100), nullable=False)
+    examCenterAddress = db.Column(db.String(100), nullable=False)
 def create_tables():
     with app.app_context():
         db.create_all()
@@ -69,7 +67,7 @@ def register_user(data):
         new_last_three_digits = "001"  # Initial value if no users exist
 
     # Construct the new id for the user
-    new_user_id = data['age_group'][:2] + "kokata"[:2] + new_last_three_digits
+    new_user_id = data['age_group'][:2] + data['examCenter'][:2].lower() + new_last_three_digits
 
     new_user = User(
         id = new_user_id,
@@ -79,8 +77,9 @@ def register_user(data):
         age=data['age'],
         age_group=data['age_group'],
         email=data['email'],
-        # exam_centre=data['exam_centre']
-        exam_centre="kolkata"
+        # examCenter=data['examCenter']
+        examCenter=data['examCenter'],
+        examCenterAddress=data['examCenterAddress']
         
     )
     db.session.add(new_user)
@@ -135,7 +134,9 @@ def generate_certificate_route():
     'dob': data.get('date'),
     'age': data.get('age'),
     'age_group': data.get('age_group'),
-    'email': data.get('email')
+    'email': data.get('email'),
+    'examCenter' : data.get('examCenter'),
+    'examCenterAddress' : data.get('examCenterAddress')
     }
     # logo_path = data.get('logoPath')
     filename = email
@@ -148,6 +149,7 @@ def generate_certificate_route():
     save_to_dropbox(pdf_data, filename)
 
     return jsonify({'success': True, 'filename': filename})
+
 
 def save_to_dropbox(pdf_data, filename):
     dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
@@ -196,10 +198,10 @@ def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, 
     c.drawString(30, 175, f"Exam Date: {exam_date}")
 
     # Exam Centre
-    c.drawString(30, 155, f"Exam Centre: {exam_centre}")
+    c.drawString(30, 155, f"Exam Centre: {examCenter}")
 
     # Exam Centre Address
-    c.drawString(30, 135, f"Exam Centre Address: {exam_centre_address}")
+    c.drawString(30, 135, f"Exam Centre Address: {examCenterAddress}")
 
     # Signature of Participant
     c.drawString(180, 100, "Signature of Participant:")
@@ -221,7 +223,7 @@ def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, 
 # Example usage:
 # generate_hall_ticket("AG/EC.123", "John Doe", "25", "AG", "John Doe Sr.", "1234 5678 9012", "9876543210", "March 15, 2024", "Exam Centre A", "123 Main St, City, Country", "hall_ticket_shorter.pdf")
 
-# def generate_refNo(age_group, exam_centre, mobile_no):
+# def generate_refNo(age_group, examCenter, mobile_no):
     
 
 
@@ -268,7 +270,7 @@ def generate_otp():
     return ''.join(secrets.choice(string.digits) for _ in range(6))
 
 def send_otp_email(username, otp):
-    msg = Message('Password Reset OTP', sender='your_email@example.com', recipients=[username])
+    msg = Message('Password Reset OTP', sender='samrig25@gmail.com', recipients=[username])
     msg.body = f'Your OTP for password reset is: {otp}'
     mail.send(msg)
 
@@ -280,7 +282,7 @@ def login():
     
     admin = Admin.query.filter_by(username=username).first()
     if not admin or admin.password != hash_password(password):
-        return jsonify({'success': False, 'message': 'Invalid username or password'}), 401
+        return jsonify({'success': False, 'message' : 'Invalid username or password'}), 401
     
     return jsonify({'success': True, 'message': 'Login successful', 'data': {'username': admin.username}})
 
@@ -291,7 +293,8 @@ def forgot_password():
     
     admin = Admin.query.filter_by(username=username).first()
     if not admin:
-        return jsonify({'success': False, 'message': 'Username not found'}), 404
+        print(username)
+        return jsonify({'success': False, 'message': 'Username is not found habibi', 'username' : username }), 404
     
     otp = generate_otp()
     admin.otp = otp

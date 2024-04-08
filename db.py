@@ -18,7 +18,7 @@ class User(db.Model):
     age = db.Column(db.Integer, nullable=False)
     age_group = db.Column(db.String(10), nullable=False)
     email = db.Column(db.String(100), nullable=False)
-    exam_centre = db.Column(db.String(100), nullable=False)
+    examCenter = db.Column(db.String(100), nullable=False)
 @app.route('/api/generate_pdf', methods=['OPTIONS'])
 def handle_options():
     return '', 200, {
@@ -38,7 +38,7 @@ def register_user():
         age=data['age'],
         age_group=data['age_group'],
         email=data['email'],
-        exam_centre=data['exam_centre']
+        examCenter=data['examCenter']
     )
     db.session.add(new_user)
     db.session.commit()

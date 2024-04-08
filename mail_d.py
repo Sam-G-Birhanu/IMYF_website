@@ -15,7 +15,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Update with your SMTP server
 app.config['MAIL_PORT'] = 587  # Update with your SMTP port
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'samrig25@gmail.com'  # Update with your email credentials
-app.config['MAIL_PASSWORD'] = 'irnckkpygnfsmwga'  # Update with your email credentials
+app.config['MAIL_PASSWORD'] = 'irnc kkpy gnfs mwga'  # Update with your email credentials
 
 mail = Mail(app)
 
