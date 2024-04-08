@@ -56,6 +56,12 @@ def create_tables():
 
 def register_user(data):
     data = request.get_json()
+
+    existing_user = User.query.filter_by(email=data['email']).first()
+
+    if existing_user:
+        return jsonify({'error': 'User with this email already exists'})
+
     # print("here")
     last_user = User.query.order_by(User.id.desc()).first()
 
