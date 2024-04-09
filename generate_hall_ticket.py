@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from flask_cors import CORS
@@ -13,9 +13,18 @@ from datetime import datetime, timedelta
 from io import BytesIO
 import dropbox
 from reportlab.pdfgen import canvas
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 sender_email = 'samrig25@gmail.com'
 sender_password = ''
+client_id=''
+client_secret=''
+refresh_token=''
+DROPBOX_ACCESS_TOKEN=''
+
 
 
 app = Flask(__name__)
@@ -157,12 +166,48 @@ def generate_certificate_route():
     return jsonify({'success': True, 'filename': filename})
 
 
+
 def save_to_dropbox(pdf_data, filename):
-    dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+    try:
+        dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+        with dropbox.Dropbox(DROPBOX_ACCESS_TOKEN) as dbx:
+            dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}')
+    except:
+        DROPBOX_ACCESS_TOKEN=refresh_access_token(refresh_token, client_id, client_secret)
+        dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+        with dropbox.Dropbox(DROPBOX_ACCESS_TOKEN) as dbx:
+            dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}')
+        print("Access token refreshed")
 
     # Upload the PDF file to Dropbox
-    with dropbox.Dropbox(DROPBOX_ACCESS_TOKEN) as dbx:
-        dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}')
+    
+
+def refresh_access_token(refresh_token, client_id, client_secret):
+    # Endpoint for refreshing access token
+    endpoint = 'https://api.dropbox.com/oauth2/token'
+
+    # Parameters for refreshing token
+    data = {
+        'refresh_token': refresh_token,
+        'grant_type': 'refresh_token',
+        'client_id': client_id,
+        'client_secret': client_secret
+    }
+
+    try:
+        # Send POST request to refresh access token
+        response = requests.post(endpoint, data=data)
+        response_data = response.json()
+
+        # Extract new access token from response
+        new_access_token = response_data.get('access_token')
+
+        # Return the new access token
+        return new_access_token
+    except Exception as e:
+        # Handle any errors that occur during token refresh
+        print("Error refreshing access token:", e)
+        return None
 
 def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, mobile_no,  exam_centre, exam_centre_address, filename, exam_date):
     buffer = BytesIO()  # Create a BytesIO object to store PDF data
@@ -253,7 +298,12 @@ def get_pdf():
         return jsonify({'error': 'PDF not found'})
 
 def download_from_dropbox(filename):
-    dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+    try:
+        dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+    except:
+        DROPBOX_ACCESS_TOKEN=refresh_access_token(refresh_token, client_id, client_secret)
+        dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+        print("Access token refreshed")
 
     try:
         metadata, res = dbx.files_download('/generated_pdfs/' + filename+'.pdf')
@@ -264,6 +314,8 @@ def download_from_dropbox(filename):
             return None  # PDF file not found
         else:
             raise
+
+
 
 
 
