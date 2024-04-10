@@ -171,12 +171,12 @@ def save_to_dropbox(pdf_data, filename):
     try:
         dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
         with dropbox.Dropbox(DROPBOX_ACCESS_TOKEN) as dbx:
-            dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}')
+            dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}'+'.pdf')
     except:
         DROPBOX_ACCESS_TOKEN=refresh_access_token(refresh_token, client_id, client_secret)
         dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
         with dropbox.Dropbox(DROPBOX_ACCESS_TOKEN) as dbx:
-            dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}')
+            dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}'+'.pdf')
         print("Access token refreshed")
 
     # Upload the PDF file to Dropbox
@@ -389,6 +389,28 @@ def reset_password():
     db.session.commit()
     
     return jsonify({'success': True, 'message': 'Password reset successful'}), 200
+
+
+
+
+@app.route('/send_email', methods=['GET'])
+def send_email():
+    email = request.args.get('email')
+    pdf_filename = email
+    pdf_data = download_from_dropbox(pdf_filename)
+    if pdf_data:
+        msg = Message('Subject',
+                      sender='samrig25@gmail.com',
+                      recipients=[email])
+        msg.body = 'Some message content'
+        msg.attach(pdf_filename, 'application/pdf', pdf_data)
+        mail.send(msg)
+        return 'Email sent successfully'
+    else:
+        return f'PDF file "{pdf_filename}" not found on Dropbox'
+
+
+
 
 
 if __name__ == '__main__':
