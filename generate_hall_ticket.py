@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from flask_cors import CORS
@@ -13,9 +13,18 @@ from datetime import datetime, timedelta
 from io import BytesIO
 import dropbox
 from reportlab.pdfgen import canvas
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 sender_email = 'samrig25@gmail.com'
 sender_password = ''
+client_id=''
+client_secret=''
+refresh_token=''
+DROPBOX_ACCESS_TOKEN=''
+
 
 
 app = Flask(__name__)
@@ -56,6 +65,12 @@ def create_tables():
 
 def register_user(data):
     data = request.get_json()
+
+    existing_user = User.query.filter_by(email=data['email']).first()
+
+    if existing_user:
+        return jsonify({'error': 'User with this email already exists'})
+
     # print("here")
     last_user = User.query.order_by(User.id.desc()).first()
 
@@ -151,12 +166,48 @@ def generate_certificate_route():
     return jsonify({'success': True, 'filename': filename})
 
 
+
 def save_to_dropbox(pdf_data, filename):
-    dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+    try:
+        dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+        with dropbox.Dropbox(DROPBOX_ACCESS_TOKEN) as dbx:
+            dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}'+'.pdf')
+    except:
+        DROPBOX_ACCESS_TOKEN=refresh_access_token(refresh_token, client_id, client_secret)
+        dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+        with dropbox.Dropbox(DROPBOX_ACCESS_TOKEN) as dbx:
+            dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}'+'.pdf')
+        print("Access token refreshed")
 
     # Upload the PDF file to Dropbox
-    with dropbox.Dropbox(DROPBOX_ACCESS_TOKEN) as dbx:
-        dbx.files_upload(pdf_data, f'/generated_pdfs/{filename}')
+    
+
+def refresh_access_token(refresh_token, client_id, client_secret):
+    # Endpoint for refreshing access token
+    endpoint = 'https://api.dropbox.com/oauth2/token'
+
+    # Parameters for refreshing token
+    data = {
+        'refresh_token': refresh_token,
+        'grant_type': 'refresh_token',
+        'client_id': client_id,
+        'client_secret': client_secret
+    }
+
+    try:
+        # Send POST request to refresh access token
+        response = requests.post(endpoint, data=data)
+        response_data = response.json()
+
+        # Extract new access token from response
+        new_access_token = response_data.get('access_token')
+
+        # Return the new access token
+        return new_access_token
+    except Exception as e:
+        # Handle any errors that occur during token refresh
+        print("Error refreshing access token:", e)
+        return None
 
 def generate_hall_ticket(roll_no, name, age, age_group, father_name, aadhar_no, mobile_no,  exam_centre, exam_centre_address, filename, exam_date):
     buffer = BytesIO()  # Create a BytesIO object to store PDF data
@@ -247,7 +298,12 @@ def get_pdf():
         return jsonify({'error': 'PDF not found'})
 
 def download_from_dropbox(filename):
-    dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+    try:
+        dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+    except:
+        DROPBOX_ACCESS_TOKEN=refresh_access_token(refresh_token, client_id, client_secret)
+        dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+        print("Access token refreshed")
 
     try:
         metadata, res = dbx.files_download('/generated_pdfs/' + filename+'.pdf')
@@ -258,6 +314,8 @@ def download_from_dropbox(filename):
             return None  # PDF file not found
         else:
             raise
+
+
 
 
 
@@ -331,6 +389,28 @@ def reset_password():
     db.session.commit()
     
     return jsonify({'success': True, 'message': 'Password reset successful'}), 200
+
+
+
+
+@app.route('/send_email', methods=['GET'])
+def send_email():
+    email = request.args.get('email')
+    pdf_filename = email
+    pdf_data = download_from_dropbox(pdf_filename)
+    if pdf_data:
+        msg = Message('Subject',
+                      sender='samrig25@gmail.com',
+                      recipients=[email])
+        msg.body = 'Some message content'
+        msg.attach(pdf_filename, 'application/pdf', pdf_data)
+        mail.send(msg)
+        return 'Email sent successfully'
+    else:
+        return f'PDF file "{pdf_filename}" not found on Dropbox'
+
+
+
 
 
 if __name__ == '__main__':
